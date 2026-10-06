@@ -113,6 +113,7 @@ is archived on Zenodo with a DOI.
    :caption: Examples
 
    examples/eaton_fire_aerial
+   examples/eaton_fire_designsafe
    examples/street_level_recovery
    examples/vehicle_detection_from_street
    examples/building_footprints_from_bing

@@ -9,6 +9,25 @@ minor releases may change public APIs.
 
 ### Added
 
+- `rapidtools.data_sources.designsafe`: list a DesignSafe published folder
+  through `dapi`, resolve a published file to a readable path (JupyterHub
+  mount, Tapis job input, or a size-capped download), and clip a window out
+  of a large orthomosaic (`clip_raster`, `patch_from_published`). Constants
+  for the Eaton Fire tiles in PRJ-5815. New optional extra
+  `rapidtools[designsafe]`.
+- `examples/eaton_fire_designsafe.ipynb`, a papermill-parametrized notebook
+  that runs the asset pipeline on a patch of a published Eaton Fire tile and
+  writes a `manifest.json` next to the outputs.
+- `deploy/tapis/rapidtools-ls6`: a DesignSafe Tapis app (definition,
+  wrapper, container recipe, README) that runs the notebook on a Lonestar6
+  GPU node, plus a documentation page for the DesignSafe example.
+
+### Changed
+
+- `examples/asset_analysis_example_generalized.ipynb` reads its Eaton Fire
+  raster from the DesignSafe publication PRJ-5815 instead of the Dropbox
+  sample, clipping a patch from the chosen tile.
+
 - `CODE_OF_CONDUCT.md` (Contributor Covenant 2.1), `CONTRIBUTING.md` and
   `SECURITY.md`, which asks for private vulnerability reports through GitHub
   Security Advisories (now enabled on the repository), plus a Contributing

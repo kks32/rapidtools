@@ -53,6 +53,14 @@ Example:
 """
 
 from .bing_aerial_image_extractor import BingAerialImageExtractor
+from .designsafe import (
+    EATON_FIRE_IMAGERY_URI,
+    clip_raster,
+    list_published_files,
+    patch_from_published,
+    published_uri,
+    resolve_published_file,
+)
 from .google_aerial_image_extractor import GoogleAerialImageExtractor
 from .google_streetview import GoogleStreetViewClient, StreetViewPanorama
 from .mapillary_client import MapillaryClient
@@ -62,6 +70,7 @@ from .tile_utils import TileUtils
 
 # Explicitly define the public API of this module.
 __all__ = [
+    'EATON_FIRE_IMAGERY_URI',
     'BingAerialImageExtractor',
     'GoogleAerialImageExtractor',
     'GoogleStreetViewClient',
@@ -70,4 +79,9 @@ __all__ = [
     'OrthomosaicReader',
     'StreetViewPanorama',
     'TileUtils',
+    'clip_raster',
+    'list_published_files',
+    'patch_from_published',
+    'published_uri',
+    'resolve_published_file',
 ]

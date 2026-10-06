@@ -98,6 +98,9 @@ dependencies = [
 # --- Optional Dependencies ---
 # Install with: pip install .[test] or pip install .[dev]
 [project.optional-dependencies]
+designsafe = [
+    "dapi>=0.6",
+]
 test = [
     "pytest",
     "pytest-cov",

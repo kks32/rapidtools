@@ -1,0 +1,181 @@
+{
+  "id": "rapidtools-ls6",
+  "version": "0.1.0",
+  "description": "Run the rAPIdtools asset pipeline (SAM 3 detection, crops, regularization, optional Gemini grading) on a patch of a RAPID orthomosaic published on DesignSafe. Executes the examples/eaton_fire_designsafe.ipynb notebook with papermill on a Lonestar6 GPU node and archives the GeoJSON outputs, the executed notebook, and a manifest.",
+  "owner": "${apiUserId}",
+  "enabled": true,
+  "runtime": "ZIP",
+  "containerImage": "tapis://cloud.data/corral/tacc/aci/CEP/applications/v3/rapidtools-ls6/rapidtools-ls6.zip",
+  "jobType": "BATCH",
+  "maxJobs": -1,
+  "maxJobsPerUser": -1,
+  "strictFileInputs": true,
+  "jobAttributes": {
+    "execSystemId": "ls6",
+    "execSystemExecDir": "${JobWorkingDir}",
+    "execSystemInputDir": "${JobWorkingDir}",
+    "execSystemOutputDir": "${JobWorkingDir}",
+    "execSystemLogicalQueue": "gpu-a100-dev",
+    "archiveSystemId": "designsafe.storage.default",
+    "archiveSystemDir": "${EffectiveUserId}/tapis-jobs-archive/${JobCreateDate}/${JobName}-${JobUUID}",
+    "archiveOnAppError": true,
+    "isMpi": false,
+    "parameterSet": {
+      "appArgs": [],
+      "containerArgs": [],
+      "schedulerOptions": [
+        {
+          "name": "TACC Scheduler Profile",
+          "description": "Loads the tacc-apptainer module.",
+          "inputMode": "FIXED",
+          "arg": "--tapis-profile tacc-apptainer",
+          "notes": {
+            "isHidden": true
+          }
+        }
+      ],
+      "envVariables": [
+        {
+          "key": "TARGET_ASSET",
+          "value": "building",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "Free-form text prompt for SAM 3, for example 'building', 'road', 'tree', 'vehicle'.",
+          "notes": {}
+        },
+        {
+          "key": "APPRX_ASSET_SIZE",
+          "value": "50",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "Approximate size of one asset in meters. Sets the SAM 3 patch size.",
+          "notes": {}
+        },
+        {
+          "key": "PATCH_SIZE_M",
+          "value": "200",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "Side of the square patch clipped from the orthomosaic, in meters. The whole tile is never processed.",
+          "notes": {}
+        },
+        {
+          "key": "PATCH_RESOLUTION_M",
+          "value": "0.05",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "Pixel size of the patch in meters. The Eaton tiles are 0.019 m; 0.05 reads from the tile overviews and keeps a 200 m patch at 4,000 pixels. Set to 0 to keep the source resolution.",
+          "notes": {}
+        },
+        {
+          "key": "PATCH_CENTER",
+          "value": "",
+          "inputMode": "INCLUDE_ON_DEMAND",
+          "description": "Patch center as 'lon,lat' in WGS84. Empty uses the center of the tile.",
+          "notes": {}
+        },
+        {
+          "key": "DETECT_IN_RECON_IMAGERY",
+          "value": "True",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "True runs SAM 3 on the RAPID patch. False detects on Bing imagery of the same footprint, which needs internet access from the compute node.",
+          "notes": {
+            "enum_values": [
+              {"True": "Detect on the RAPID orthomosaic (default)"},
+              {"False": "Detect on Bing imagery of the same footprint"}
+            ]
+          }
+        },
+        {
+          "key": "RUN_DAMAGE_ANALYSIS",
+          "value": "False",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "True grades each asset crop with Gemini. Needs GOOGLE_API_KEY in inputs/secrets.env and internet access.",
+          "notes": {
+            "enum_values": [
+              {"False": "Skip damage grading (default)"},
+              {"True": "Grade with Gemini"}
+            ]
+          }
+        },
+        {
+          "key": "STEPS",
+          "value": "all",
+          "inputMode": "INCLUDE_ON_DEMAND",
+          "description": "'all' runs the pipeline. 'patch' stops after the clip, which checks staging and data access in a minute without a GPU.",
+          "notes": {
+            "enum_values": [
+              {"all": "Full pipeline (default)"},
+              {"patch": "Clip only"}
+            ]
+          }
+        },
+        {
+          "key": "CONTAINER_IMAGE",
+          "value": "docker://ghcr.io/kks32/rapidtools:tapis-0.2.0",
+          "inputMode": "INCLUDE_BY_DEFAULT",
+          "description": "Image with rapidtools, papermill, and dapi (built from deploy/tapis/rapidtools-ls6/Dockerfile). docker:// is pulled at job start; an absolute path to a .sif on $WORK skips the pull.",
+          "notes": {}
+        },
+        {
+          "key": "HF_CACHE",
+          "value": "",
+          "inputMode": "INCLUDE_ON_DEMAND",
+          "description": "Directory for Hugging Face model weights. Empty uses $WORK/rapidtools/hf-cache, which persists between jobs so SAM 3 downloads once.",
+          "notes": {}
+        },
+        {
+          "key": "NOTEBOOK",
+          "value": "",
+          "inputMode": "INCLUDE_ON_DEMAND",
+          "description": "Notebook to run instead of the bundled examples/eaton_fire_designsafe.ipynb. A file name inside the Extra inputs directory.",
+          "notes": {}
+        }
+      ],
+      "archiveFilter": {
+        "includes": [],
+        "excludes": ["rapidtools-ls6.zip", "orthomosaic.tiff", "apptainer-cache"],
+        "includeLaunchFiles": true
+      }
+    },
+    "fileInputs": [
+      {
+        "name": "Orthomosaic",
+        "inputMode": "REQUIRED",
+        "sourceUrl": "tapis://designsafe.storage.published/published-data/PRJ-5815/Mission--eaton-fire-burn-area--V3/data/Geoscience-collection--eaton-fire-processed-data-february-march-2025/data/Imagery/Eaton_Trinity38_RGBortho_20250214.tiff",
+        "targetPath": "orthomosaic.tiff",
+        "envKey": "ORTHOMOSAIC",
+        "description": "A GeoTIFF orthomosaic. The default is the smallest Eaton Fire tile in PRJ-5815 (4.7 GB). The patch is clipped from this file on the node.",
+        "notes": {
+          "selectionMode": "file"
+        }
+      },
+      {
+        "name": "Extra inputs",
+        "inputMode": "OPTIONAL",
+        "sourceUrl": null,
+        "targetPath": "inputs",
+        "envKey": "EXTRA_INPUTS",
+        "description": "Optional directory with secrets.env (GOOGLE_API_KEY, HF_TOKEN), a replacement notebook, or a .sif image.",
+        "notes": {
+          "selectionMode": "directory"
+        }
+      }
+    ],
+    "fileInputArrays": [],
+    "nodeCount": 1,
+    "coresPerNode": 128,
+    "memoryMB": 256000,
+    "maxMinutes": 120,
+    "subscriptions": [],
+    "tags": []
+  },
+  "tags": [
+    "portalName: DesignSafe"
+  ],
+  "notes": {
+    "label": "rAPIdtools asset analysis (Lonestar6 GPU)",
+    "helpUrl": "https://rapid-facility.github.io/rAPIdtools/",
+    "hideNodeCountAndCoresPerNode": true,
+    "isInteractive": false,
+    "icon": "Generic-App",
+    "category": "Analysis",
+    "queueFilter": ["gpu-a100-dev", "gpu-a100-small", "gpu-a100"]
+  }
+}
