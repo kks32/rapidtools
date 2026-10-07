@@ -109,6 +109,10 @@ def test_local_candidates_prefers_override(monkeypatch, tmp_path):
     assert candidates[2] == (
         ds_src.JUPYTER_PUBLISHED_MOUNT / 'published-data/PRJ-5815/x/y.tiff'
     )
+    assert candidates[3:] == [
+        root / 'published-data/PRJ-5815/x/y.tiff'
+        for root in ds_src.TACC_PUBLISHED_ROOTS
+    ]
 
 
 def test_local_candidates_rejects_other_systems():

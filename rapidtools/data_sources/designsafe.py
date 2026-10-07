@@ -90,6 +90,12 @@ PUBLISHED_ROOT = 'published-data'
 JUPYTER_PUBLISHED_MOUNT = Path('/home/jupyter/NHERI-Published')
 """Where DesignSafe JupyterHub mounts the published system."""
 
+TACC_PUBLISHED_ROOTS = (
+    Path('/corral/projects/NHERI/published'),
+    Path('/corral-repl/projects/NHERI/published'),
+)
+"""Corral roots of the published system on TACC hosts that mount corral."""
+
 EATON_FIRE_PROJECT = 'PRJ-5815'
 EATON_FIRE_IMAGERY_PATH = (
     'Mission--eaton-fire-burn-area--V3/data/'
@@ -198,9 +204,9 @@ def local_candidates(uri: str) -> list[Path]:
     Paths where a published file may already be readable without a download.
 
     Checked in order: the directory named by ``RAPIDTOOLS_PUBLISHED_ROOT``
-    (set it when the published system is mounted somewhere else), then the
+    (set it when the published system is mounted somewhere else), the
     DesignSafe JupyterHub mount with and without the ``published-data``
-    prefix.
+    prefix, then the corral roots on TACC hosts.
 
     Args:
         uri: Tapis URI on the published system.
@@ -210,7 +216,7 @@ def local_candidates(uri: str) -> list[Path]:
 
     Example:
         >>> local_candidates(published_uri('PRJ-5815', 'a/b.tiff'))[-1]
-        PosixPath('/home/jupyter/NHERI-Published/published-data/PRJ-5815/a/b.tiff')
+        PosixPath('/corral-repl/projects/NHERI/published/published-data/PRJ-5815/a/b.tiff')
     """
     system_id, path = _split_uri(uri)
     if system_id != PUBLISHED_SYSTEM:
@@ -222,6 +228,7 @@ def local_candidates(uri: str) -> list[Path]:
         candidates.append(Path(override) / without_root)
     candidates.append(JUPYTER_PUBLISHED_MOUNT / without_root)
     candidates.append(JUPYTER_PUBLISHED_MOUNT / path)
+    candidates.extend(root / path for root in TACC_PUBLISHED_ROOTS)
     return candidates
 
 

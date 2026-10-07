@@ -63,6 +63,27 @@ submitted.monitor()
 
 Set `STEPS` to `patch` for a one-minute check of staging and the clip that needs no GPU and no model download. Pass `PATCH_CENTER` as `lon,lat` to move the patch. The tiles are 1.9 cm per pixel; `PATCH_RESOLUTION_M` (default 0.05) resamples the patch from the tile overviews so a 200 m patch is 4,000 pixels across instead of 10,000.
 
+## Check data access on a node before using GPU time
+
+`check_data_access.py` reports whether a host can read the published system in place (JupyterHub mount, corral on TACC) or needs Tapis staging, and times the 200 m, 5 cm clip there. Run it as a short CPU job through the DesignSafe `python-s3` app with `check_setup.sh` as the pre-script, which installs rapidtools from the fork without its model dependencies:
+
+```python
+job = ds.jobs.generate(
+    app_id='python-s3',
+    input_dir_uri='tapis://designsafe.storage.default/<user>/rapidtools-checks/',
+    script_filename='check_data_access.py',
+    queue='skx-dev',
+    max_minutes=20,
+    allocation='<your allocation>',
+    extra_env_vars=[
+        {'key': 'PRE_SCRIPT', 'value': 'check_setup.sh'},
+        {'key': 'PIP_PACKAGES', 'value': 'rasterio,shapely,pyshp,scikit-image,huggingface_hub,pandas,matplotlib,requests,tqdm'},
+    ],
+)
+```
+
+The archived `check_data_access.json` says where the tile was read from and how long the clip took.
+
 ## Secrets
 
 Gemini grading (`RUN_DAMAGE_ANALYSIS=True`) needs `GOOGLE_API_KEY`. SAM 3 weights on the Hugging Face Hub may need `HF_TOKEN`. Put them in a `secrets.env` file inside a directory you pass as **Extra inputs**; the wrapper sources it. Job parameters are visible in job records, so keys never go there.
