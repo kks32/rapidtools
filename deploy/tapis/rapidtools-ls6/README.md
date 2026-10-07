@@ -77,7 +77,7 @@ job = ds.jobs.generate(
     allocation='<your allocation>',
     extra_env_vars=[
         {'key': 'PRE_SCRIPT', 'value': 'check_setup.sh'},
-        {'key': 'PIP_PACKAGES', 'value': 'rasterio,shapely,pyshp,scikit-image,huggingface_hub,pandas,matplotlib,requests,tqdm'},
+        {'key': 'PIP_PACKAGES', 'value': 'rasterio'},  # makes python-s3 create the venv; the script installs the rest
     ],
 )
 ```
