@@ -84,6 +84,8 @@ job = ds.jobs.generate(
 
 The archived `check_data_access.json` says where the tile was read from and how long the clip took.
 
+Result on Oct 7, 2026, job `8bc6e274-395b-484a-9bc8-3f302224c5bb-007` on Stampede3 `skx-dev` node c454-014: no corral mount on the compute node (`/corral/projects/NHERI/published` and `/corral-repl/...` absent), so published tiles reach HPC jobs only through Tapis file-input staging, which is what `app.json` declares. The torch-free install and the check script ran in under a minute, and the node cloned GitHub directly, so compute nodes have outbound internet.
+
 ## Secrets
 
 Gemini grading (`RUN_DAMAGE_ANALYSIS=True`) needs `GOOGLE_API_KEY`. SAM 3 weights on the Hugging Face Hub may need `HF_TOKEN`. Put them in a `secrets.env` file inside a directory you pass as **Extra inputs**; the wrapper sources it. Job parameters are visible in job records, so keys never go there.
